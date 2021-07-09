@@ -1,5 +1,7 @@
-using microcritic.Server.Data;
-using microcritic.Server.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
+
+using microcritic.Server.Data;
+using microcritic.Server.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace microcritic.Server
 {
@@ -34,7 +39,12 @@ namespace microcritic.Server
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentityServer()
@@ -47,10 +57,11 @@ namespace microcritic.Server
             services.AddRazorPages();
 
             services.AddLettuceEncrypt();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -81,6 +92,33 @@ namespace microcritic.Server
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });
+
+            CreateRoles(serviceProvider).Wait();
+        }
+
+        private async Task CreateRoles(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            if(!await roleManager.RoleExistsAsync(Configuration["AppSettings:AdminRole"]))
+            {
+                await roleManager.CreateAsync(new IdentityRole(Configuration["AppSettings:AdminRole"]));
+            }
+
+            var admin = new ApplicationUser
+            {
+                UserName = Configuration["AppSettings:AdminUser"],
+                Email = Configuration["AppSettings:AdminEmail"]
+            };
+
+            if(await userManager.FindByEmailAsync(admin.Email) is null)
+            {
+                if((await userManager.CreateAsync(admin, Configuration["AppSettings:AdminPassword"])).Succeeded)
+                {
+                    await userManager.AddToRoleAsync(admin, Configuration["AppSettings:AdminRole"]);
+                }
+            }
         }
     }
 }
