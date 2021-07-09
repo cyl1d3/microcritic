@@ -4,27 +4,27 @@
 
 <h3>Games List</h3>
 
-<table>
-	<thead>
-
-	</thead>
-	<tbody>
-		@foreach (var game in _games ?? Array.Empty<Game>())
-		{
-			<tr>
-				<td>@game.Name</td>
-				<td>@game.Developer</td>
-				<td>@game.Score</td>
-			</tr>
-			<tr>@game.Description</tr>
-		}
-	</tbody>
-</table>
+<div class="w-100 h-100 d-flex justify-content-center mt-5">
+	<table class="table table-hover w-75">
+		<thead>
+		</thead>
+		<tbody>
+			@foreach (var game in _games ?? Array.Empty<Game>())
+			{
+				<tr>
+					<td><a href="/gamedetails/@game.Id">@game.Name</a></td>
+					<td>@game.Developer</td>
+					<td><ScoreDisplay Score="game.Score" ReviewCount="game.ReviewCount" /></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
 
 @code {
 
 	private Game[] _games;
-	private int _page;
+	private int _page = 0;
 
 	protected override void OnInitialized()
 	{
@@ -35,6 +35,7 @@
 	private async Task Refresh()
 	{
 		_games = await Http.GetFromJsonAsync<Game[]>($"/api/Games/List/{_page}");
+		StateHasChanged();
 	}
 
 }

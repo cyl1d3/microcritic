@@ -1,0 +1,35 @@
+﻿<div class="">
+	<span class="mr-2">@(Score.HasValue ? Score.Value.ToString("0.00") : "Noch nicht bewertet")</span>
+	@if (@Score.HasValue)
+	{
+		@for (int i = 1; i <= MAXSCORE; i++)
+		{
+		 <Icon Name="@IconName(i)" IconStyle="@IconStyle(i)" Style="color:#ffc83d" />
+		}
+	 <small class="ml-2">(@ReviewCount)</small>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public decimal? Score { get; set; }
+
+	[Parameter]
+	public int? ReviewCount { get; set; }
+
+	public decimal RoundedScore => Math.Round((Score ?? 0) * 2, MidpointRounding.AwayFromZero) / 2;
+
+	private const int MAXSCORE = 5;
+
+	private string IconName(int star)
+		=> RoundedScore > (star - 1) ?
+			(RoundedScore > (star - 0.5m)
+				? FontAwesomeIcons.Star
+				: FontAwesomeIcons.StarHalf)
+			: FontAwesomeIcons.Star;
+
+	private Blazorise.IconStyle IconStyle(int star)
+			=> RoundedScore > (star - 1) ? Blazorise.IconStyle.Solid : Blazorise.IconStyle.Regular;
+
+
+}

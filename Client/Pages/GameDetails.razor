@@ -1,0 +1,56 @@
+﻿@page "/gamedetails/{id}"
+@inject HttpClient Http
+@using microcritic.Shared.ViewModels
+
+
+
+@if (_game is null)
+{
+	<p>...</p>
+}
+else
+{
+	<div class="w-100 h-100 d-flex justify-content-center mt-5">
+		<div class="d-flex w-75">
+			<div class="d-flex align-items-center justify-content-center" style="border:1px solid black; width:200px; height:323px">
+				<Icon Name="FontAwesomeIcons.Gamepad" class="game-placeholder" />
+			</div>
+			<div class="flex-column w-75 ml-2">
+				<ul class="list-group">
+					
+					<li class="list-group-item"><h3>@_game?.Name</h3></li>
+					<li class="list-group-item"><h4>@_game.Developer</h4><ScoreDisplay Score="@_game.Score" ReviewCount="@_game.ReviewCount" /></li>
+					<li class="list-group-item">@_game.Description</li>				
+				</ul>
+				<p class="mt-2">
+					
+				</p>
+			</div>	
+		</div>
+	</div>
+}
+
+@code {
+
+	[Parameter]
+	public string Id { get; set; }
+
+	private Game _game;
+	private Review[] _reviews;
+	private int _reviewPage;
+
+	
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		Refresh();
+	}
+
+	private async Task Refresh()
+	{
+		_game = await Http.GetFromJsonAsync<Game>($"/api/Games/Game/{Id}");
+		_reviews = await Http.GetFromJsonAsync<Review[]>($"/api/Reviews/Game/{Id}/{_reviewPage}");
+		StateHasChanged();
+	}
+
+}

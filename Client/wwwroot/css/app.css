@@ -37,6 +37,10 @@ a, .btn-link {
     background-position: center;
 }
 
+.game-placeholder {
+    font-size: 60px;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
