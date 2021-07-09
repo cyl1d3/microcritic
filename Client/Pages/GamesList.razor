@@ -1,0 +1,40 @@
+﻿@page "/gameslist"
+@inject HttpClient Http
+@using microcritic.Shared.ViewModels
+
+<h3>Games List</h3>
+
+<table>
+	<thead>
+
+	</thead>
+	<tbody>
+		@foreach (var game in _games ?? Array.Empty<Game>())
+		{
+			<tr>
+				<td>@game.Name</td>
+				<td>@game.Developer</td>
+				<td>@game.Score</td>
+			</tr>
+			<tr>@game.Description</tr>
+		}
+	</tbody>
+</table>
+
+@code {
+
+	private Game[] _games;
+	private int _page;
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		Refresh();
+	}
+
+	private async Task Refresh()
+	{
+		_games = await Http.GetFromJsonAsync<Game[]>($"/api/Games/List/{_page}");
+	}
+
+}

@@ -108,7 +108,7 @@ namespace microcritic.Server
 
             var admin = new ApplicationUser
             {
-                UserName = Configuration["AppSettings:AdminUser"],
+                UserName = Configuration["AppSettings:AdminEmail"],
                 Email = Configuration["AppSettings:AdminEmail"]
             };
 

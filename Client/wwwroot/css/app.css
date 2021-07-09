@@ -30,6 +30,13 @@ a, .btn-link {
     color: red;
 }
 
+.microcritic-logo {
+    background-image:url(../img/microcritic.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
