@@ -24,6 +24,9 @@ namespace microcritic.Server.Models
         [Required]
         public Game Game { get; set; }
 
+        [ForeignKey(nameof(Game))]
+        public Guid GameId { get; set; }
+
         [Required]
         public DateTime Date { get; set; }
 

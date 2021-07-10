@@ -16,14 +16,15 @@ namespace microcritic.Server.Extensions
                 Name = game.Name,
                 Description = game.Description,
                 Developer = game.Developer.Name,
-                Score = (decimal)game.Reviews.Average(r => (byte)r.Rating),
-                ReviewCount = game.Reviews.Count,
+                Score = (decimal?)game.Reviews?.Average(r => r is null ? null : (byte)r.Rating),
+                ReviewCount = game.Reviews?.Count,
             };
 
         public static Shared.ViewModels.Review ToViewModel(this Review review)
             => new Shared.ViewModels.Review
             {
                 Id = review.Id,
+                Game = review.Game.Id,
                 Rating = review.Rating,
                 UserName = review.User.UserName,
                 Text = review.Text,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,13 +21,15 @@ namespace microcritic.Server.Controllers
     {
         private const int PAGESIZE = 5;
 
-        private ApplicationDbContext _context;
-        private ILogger _logger;
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger _logger;
+        private readonly UserManager<Models.ApplicationUser> _userManager;
 
-        public ReviewsController(ApplicationDbContext context, ILogger<GamesController> logger)
+        public ReviewsController(ApplicationDbContext context, ILogger<GamesController> logger, UserManager<Models.ApplicationUser> userManager)
         {
             _context = context;
             _logger = logger;
+            _userManager = userManager;
         }
 
         [HttpGet("{id}/{page:int?}")]
@@ -47,5 +50,54 @@ namespace microcritic.Server.Controllers
                 return null;
             }
         }
+
+        [HttpGet("{gameid}/User/{username}")]
+        [Authorize]
+        public async Task<Review> Game(string gameid, string username)
+        {
+            if (Guid.TryParse(gameid, out var gameGuid))
+            {
+                return await _context.Reviews
+                    .Include(r => r.Game)
+                    .Include(r => r.User)
+                    .Where(r => r.Game.Id == gameGuid)
+                    .Where(r => r.User.UserName == username)
+                    .Select(r => r.ToViewModel())
+                    .SingleOrDefaultAsync() 
+                    ?? new Review 
+                    {
+                        Game = gameGuid,
+                        UserName = username,
+                        Rating = Shared.Enums.Rating.Ausgezeichnet,
+                    };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult> Add([FromBody] Review review)
+        {
+            if(ModelState.IsValid)
+            {
+                var user = await _userManager.FindByNameAsync(review.UserName);
+
+                await _context.Reviews.AddAsync(new Models.Review
+                    {
+                        Id = Guid.NewGuid(),
+                        GameId = review.Game,
+                        User = user,
+                        Date = DateTime.Now,
+                        Rating = review.Rating,
+                        Text = review.Text,
+                    });
+                await _context.SaveChangesAsync();
+            }
+            return Ok();
+        }
+
     }
 }

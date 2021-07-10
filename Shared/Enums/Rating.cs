@@ -8,11 +8,11 @@ namespace microcritic.Shared.Enums
 {
     public enum Rating
     {
-        Bad = 0,
-        Poor = 1,
-        Disappointing = 2,
-        Average = 3,
-        Great = 4,
-        Perfect = 5
+        Schlecht = 0,
+        Schwach = 1,
+        Enttäuschend = 2,
+        Durchschnittlich = 3,
+        Gut = 4,
+        Ausgezeichnet = 5
     }
 }

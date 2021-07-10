@@ -1,12 +1,15 @@
 ﻿<div class="">
 	<span class="mr-2">@(Score.HasValue ? Score.Value.ToString("0.00") : "Noch nicht bewertet")</span>
-	@if (@Score.HasValue)
+	@if (Score.HasValue)
 	{
 		@for (int i = 1; i <= MAXSCORE; i++)
 		{
 		 <Icon Name="@IconName(i)" IconStyle="@IconStyle(i)" Style="color:#ffc83d" />
 		}
-	 <small class="ml-2">(@ReviewCount)</small>
+		@if (ReviewCount.HasValue)
+		{
+			<small class="ml-2">(@ReviewCount)</small>
+		}
 	}
 </div>
 
