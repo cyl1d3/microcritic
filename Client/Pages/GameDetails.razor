@@ -2,8 +2,6 @@
 @inject IHttpClientFactory HttpClientFactory
 @using microcritic.Shared.ViewModels
 
-
-
 @if (_game is null)
 {
 	<p>...</p>
@@ -26,12 +24,12 @@ else
 	</div>
 	<div class="w-100 h-100 d-flex justify-content-center mt-5 mb-5">
 		<div class="d-flex w-75">
-			<UserReview Game="_game"/>
+			<UserReview @ref="_userReview" Game="_game" OnReviewChanged="ReloadComponents" />
 		</div>
 	</div>	
 	<div class="w-100 h-100 d-flex justify-content-center mt-5 mb-5">
 		<div class="d-flex w-75">
-			<ReviewList Game="_game"/>
+			<ReviewList @ref="_reviewList" Game="_game" OnReviewsChanged="ReloadComponents" />
 		</div>
 	</div>
 }
@@ -42,6 +40,8 @@ else
 	public string Id { get; set; }
 
 	private Game _game;
+	private UserReview _userReview;
+	private ReviewList _reviewList;
 	
 	protected override async Task OnInitializedAsync()
 	{
@@ -54,6 +54,13 @@ else
 		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
 		_game = await http.GetFromJsonAsync<Game>($"/api/Games/Game/{Id}");
 		StateHasChanged();
+	}
+
+	private async Task ReloadComponents()
+	{
+		await Refresh();
+		await _userReview.Refresh();
+		await _reviewList.Refresh();
 	}
 
 }

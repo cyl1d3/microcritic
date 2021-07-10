@@ -14,6 +14,8 @@ using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 
+using microcritic.Client.Logic;
+
 namespace microcritic.Client
 {
     public class Program
@@ -34,7 +36,8 @@ namespace microcritic.Client
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("microcritic.ServerAPI"));
 
-            builder.Services.AddApiAuthorization();
+            builder.Services.AddApiAuthorization()
+                .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
 
             builder.Services
                  .AddBlazorise(options =>
@@ -44,6 +47,8 @@ namespace microcritic.Client
                  .AddBootstrapProviders()
                  .AddFontAwesomeIcons();
 
+            builder.Services.AddOptions();
+            builder.Services.AddAuthorizationCore();
 
             await builder.Build().RunAsync();
         }

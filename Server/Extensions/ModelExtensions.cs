@@ -29,7 +29,7 @@ namespace microcritic.Server.Extensions
                 UserName = review.User.UserName,
                 Text = review.Text,
                 Date = review.Date,
-                DateString = review.Date.Humanize(culture: CultureInfo.GetCultureInfo("de-DE")),
+                DateString = review.Date.Humanize(utcDate:false, culture: CultureInfo.GetCultureInfo("de-DE")),
             };
     }
 }

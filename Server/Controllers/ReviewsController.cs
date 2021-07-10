@@ -99,5 +99,23 @@ namespace microcritic.Server.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{reviewid}")]
+        public async Task<IActionResult> Delete(string reviewId)
+        {
+            if(Guid.TryParse(reviewId, out var reviewGuid))
+            {
+                var review = await _context.Reviews.Where(r => r.Id == reviewGuid).SingleOrDefaultAsync();
+
+                _context.Reviews.Remove(review);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
     }
 }

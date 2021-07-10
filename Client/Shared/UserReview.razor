@@ -1,5 +1,4 @@
-﻿@inject AuthenticationStateProvider GetAuthenticationStateAsync
-@inject IHttpClientFactory HttpClientFactory
+﻿@inject IHttpClientFactory HttpClientFactory
 @using System.Linq
 @using microcritic.Shared.Enums
 @using microcritic.Shared.ViewModels
@@ -54,20 +53,26 @@
 </div>
 
 @code {
+    
+	[CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     [Parameter]
 	public Game Game { get; set; }
+
+    [Parameter]
+    public EventCallback OnReviewChanged { get; set; }
 
     private Review _myReview;
     private AuthenticationState _authState;
 
 	protected async override Task OnInitializedAsync()
     {
-        _authState = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        _authState = await authenticationStateTask;
         await Refresh();
     }
 
-    private async Task Refresh()
+    public async Task Refresh()
     {
         if (_authState?.User?.Identity?.IsAuthenticated ?? false)
         {
@@ -84,7 +89,8 @@
         {
             var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
             await http.PostAsJsonAsync("/api/Reviews/Add", _myReview);
-            await Refresh();
+
+            await OnReviewChanged.InvokeAsync();
         }
     }
 

@@ -19,30 +19,50 @@
 			<div class="card-body">
 				<div class="float-right"><ScoreDisplay Score="(decimal)review.Rating"/></div>
 				<p class="card-text mt-1">@review.Text</p>
+				<AuthorizeView Roles="Admin">
+					<Authorized>
+						<button type="button" class="btn btn-outline-danger float-right" @onclick="() => Delete(review)">Löschen</button>
+					</Authorized>
+				</AuthorizeView>
 			</div>
 		</div>
 	}
 </div>
 
-@code {
+@code {	
+	[CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
 	[Parameter]
 	public Game Game { get; set; }
+	
+    [Parameter]
+    public EventCallback OnReviewsChanged { get; set; }
 
 	private Review[] _reviews;
 	private int _reviewPage;
+    private AuthenticationState _authState;
 
 	protected override async Task OnInitializedAsync()
 	{
 		base.OnInitialized();
+        _authState = await authenticationStateTask;
 		await Refresh();
 	}
 		
-	private async Task Refresh()
+	public async Task Refresh()
 	{
 		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
 		_reviews = await http.GetFromJsonAsync<Review[]>($"/api/Reviews/Game/{Game.Id}/{_reviewPage}");
 		StateHasChanged();
+	}
+
+	private async Task Delete(Review review)
+	{
+		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
+		await http.DeleteAsync($"/api/Reviews/Delete/{review.Id}");
+
+		await OnReviewsChanged.InvokeAsync();
 	}
 
 	private string GetFaceholder(Rating rating)
