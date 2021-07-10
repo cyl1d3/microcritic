@@ -1,0 +1,89 @@
+﻿@inject IHttpClientFactory HttpClientFactory
+@using System.Globalization;
+@using System.IO
+
+@using Blazorise.Icons.FontAwesome
+@using CsvHelper
+
+@using microcritic.Shared.ViewModels
+
+
+<div class="m-4">
+    <div class="form-group">
+        <Blazorise.Bootstrap.FileEdit class="@(_error ? "is-invalid" : "")" Changed="@LoadFile" />
+        <span class="text-danger float-left @(_error ? "" : "collapse")">Fehler beim Einlesen des CSV!</span>  
+        <span class="text-danger float-left @(_error ? "" : "collapse")">Fehler beim Einlesen des CSV!</span>  
+    </div>
+    <Blazorise.Bootstrap.Button
+        Class="mt-2 float-right"
+        Color="Blazorise.Color.Primary"
+        Loading="_processing" 
+        Disabled="!HasRecords"
+        @onclick="SaveGames">
+        Upload
+    </Blazorise.Bootstrap.Button>
+    
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnGamesChanged { get; set; }
+
+    public bool HasRecords => (_games?.Count() ?? 0) > 0;
+
+    private IEnumerable<CsvGame> _games;
+    private bool _processing;
+    private bool _success;
+    private int _inserts;
+    private bool _error;
+
+    private bool _test;
+
+    private async Task LoadFile(Blazorise.FileChangedEventArgs args)
+    {
+        if (args.Files.Count() == 0) return;
+
+        _success = false;
+        _inserts = 0;
+        _error = false;
+        _processing = true;
+
+        try
+        {
+            var file = args.Files.FirstOrDefault();
+            var content = await new StreamReader(file.OpenReadStream()).ReadToEndAsync();
+            using var csv = new CsvReader(new StringReader(content), CultureInfo.InvariantCulture);
+
+            _games = csv.GetRecords<CsvGame>().ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            _error = true;
+        }
+        finally
+        {
+            _processing = false;
+            StateHasChanged();
+        }
+    }
+
+
+    private async Task SaveGames()
+    {
+        _processing = true;
+        var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
+        var result = await http.PostAsJsonAsync("/api/Games/AddCsv", _games);
+
+        if(result.IsSuccessStatusCode)
+        {
+            _success = true;
+            _inserts = (await result.Content.ReadFromJsonAsync<IEnumerable<Game>>()).Count();
+        }
+
+        await OnGamesChanged.InvokeAsync();
+        _games = null;
+        _processing = false;
+    }
+
+}

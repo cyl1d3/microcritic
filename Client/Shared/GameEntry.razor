@@ -1,0 +1,95 @@
+﻿@inject IHttpClientFactory HttpClientFactory
+@using System.Net;
+@using Blazored.Typeahead;
+@using microcritic.Shared.ViewModels;
+
+<EditForm Model="_game" OnValidSubmit="SaveGame" Context="editContext">
+	<DataAnnotationsValidator />
+    <ValidationSummary />
+    <ul class="list-group list-group-flush">                
+        <li class="list-group-item">
+            <div class="form-group @(_gameExistsError ? "has-danger" : "")" >
+                <input type="text" class="form-control @(_gameExistsError ? "is-invalid" : "")" placeholder="Titel" @bind="_game.Name" @onkeypress="ResetError" />
+                <div class="invalid-feedback @(_gameExistsError ? "" : "collapse")">Spiel existiert bereits!</div>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <BlazoredTypeahead
+                    SearchMethod="@SearchDev" 
+                    @bind-Value="_game.Developer" 
+                    Context="devContext"
+                    Debounce="500"
+                    MinimumLength="2"
+                    placeholder="Entwickler"
+                    AddItemOnEmptyResultMethod="@AddDev" >
+                <SelectedTemplate>@devContext.Name</SelectedTemplate>
+                <ResultTemplate>@devContext.Name</ResultTemplate>
+                <NotFoundTemplate>"@devContext" erstellen</NotFoundTemplate>
+            </BlazoredTypeahead>
+        </li>
+        <li class="list-group-item">
+            <textarea placeholder="Beschreibung" class="form-control" rows="5" @bind="_game.Description" />
+        </li>
+        <li class="list-group-item">
+            <button class="btn btn-primary float-right" type="submit">Speichern</button>
+        </li>                    
+    </ul>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback OnGamesChanged { get; set; }
+
+    private Game _game = new();
+    private HttpClient _http;
+    private bool _gameExistsError;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
+    }
+
+    private async Task<IEnumerable<Developer>> SearchDev(string searchText)
+    {
+        return await _http.GetFromJsonAsync<Developer[]>($"/api/Developers/List/{searchText}");
+    }
+
+    private async Task<Developer> AddDev(string searchText)
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            return null;
+        }
+        else
+        {
+            return new Developer
+            {
+                Name = searchText
+            };
+        }
+    }
+
+	private async Task SaveGame()
+	{
+        var result = await _http.PostAsJsonAsync("/api/Games/Add", _game);
+        if(result.StatusCode == HttpStatusCode.Conflict)
+        {
+            _gameExistsError = true;
+            return;
+        }
+
+        await OnGamesChanged.InvokeAsync();
+        _game = new();
+	}
+
+    private void ResetError()
+    {
+        if (_gameExistsError)
+        {
+            _gameExistsError = false;
+            StateHasChanged();
+        }
+    }
+
+}

@@ -32,7 +32,7 @@ namespace microcritic.Server.Controllers
         [HttpGet("{id}")]
         public async Task<Game> Game(string id)
         {
-            if(Guid.TryParse(id, out var guid))
+            if (Guid.TryParse(id, out var guid))
             {
                 return (await _context.Games.Where(g => g.Id == guid)
                         .Include(g => g.Developer)
@@ -59,12 +59,14 @@ namespace microcritic.Server.Controllers
                 .ToListAsync();
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add([FromBody] Game game)
         {
             if (ModelState.IsValid)
             {
                 Models.Developer developer;
-                if(game.Developer.Id == Guid.Empty)
+                if (game.Developer.Id == Guid.Empty)
                 {
                     developer = new Models.Developer
                     {
@@ -93,8 +95,22 @@ namespace microcritic.Server.Controllers
                 });
 
                 await _context.SaveChangesAsync();
+                return Ok();
             }
-            return Ok();
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddCsv([FromBody] IEnumerable<CsvGame> games)
+        {
+            if (ModelState.IsValid)
+            {
+
+
+                return new OkObjectResult(4);
+            }
+            return BadRequest();
         }
     }
 }
