@@ -28,6 +28,11 @@ else
 		<div class="d-flex w-75">
 			<UserReview Game="_game"/>
 		</div>
+	</div>	
+	<div class="w-100 h-100 d-flex justify-content-center mt-5 mb-5">
+		<div class="d-flex w-75">
+			<ReviewList Game="_game"/>
+		</div>
 	</div>
 }
 
@@ -37,21 +42,17 @@ else
 	public string Id { get; set; }
 
 	private Game _game;
-	private Review[] _reviews;
-	private int _reviewPage;
-
 	
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		base.OnInitialized();
-		Refresh();
+		await Refresh();
 	}
 
 	private async Task Refresh()
 	{
 		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
 		_game = await http.GetFromJsonAsync<Game>($"/api/Games/Game/{Id}");
-		_reviews = await http.GetFromJsonAsync<Review[]>($"/api/Reviews/Game/{Id}/{_reviewPage}");
 		StateHasChanged();
 	}
 

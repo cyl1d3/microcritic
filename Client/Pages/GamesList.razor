@@ -28,10 +28,10 @@
 	private Game[] _games;
 	private int _page = 0;
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		base.OnInitialized();
-		Refresh();
+		await Refresh();
 	}
 
 	private async Task Refresh()

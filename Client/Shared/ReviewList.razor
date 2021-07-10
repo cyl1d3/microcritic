@@ -1,0 +1,58 @@
+﻿@inject IHttpClientFactory HttpClientFactory
+@using Blazorise.Icons.FontAwesome
+@using microcritic.Shared.Enums
+@using microcritic.Shared.ViewModels
+
+<div class="flex-column d-flex justify-content-center w-100">
+	@foreach(var review in _reviews ?? Array.Empty<Review>())
+	{
+		<div class="card border-secondary mb-3 w-75 align-self-center" >
+			<div class="card-header">
+				<div class="flex-row">
+					<div class="d-flex float-left align-items-center justify-content-center mr-2" style="border:1px solid black; border-radius:5px; min-width:40px; min-height:40px" >
+						<Icon Name="@GetFaceholder(review.Rating)" IconStyle="Blazorise.IconStyle.Regular" class="face-placeholder" />
+					</div>
+					<span>@review.UserName</span>
+					<span class="float-right"><small>@review.DateString</small></span>
+				</div>
+			</div>
+			<div class="card-body">
+				<div class="float-right"><ScoreDisplay Score="(decimal)review.Rating"/></div>
+				<p class="card-text mt-1">@review.Text</p>
+			</div>
+		</div>
+	}
+</div>
+
+@code {
+
+	[Parameter]
+	public Game Game { get; set; }
+
+	private Review[] _reviews;
+	private int _reviewPage;
+
+	protected override async Task OnInitializedAsync()
+	{
+		base.OnInitialized();
+		await Refresh();
+	}
+		
+	private async Task Refresh()
+	{
+		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
+		_reviews = await http.GetFromJsonAsync<Review[]>($"/api/Reviews/Game/{Game.Id}/{_reviewPage}");
+		StateHasChanged();
+	}
+
+	private string GetFaceholder(Rating rating)
+		=> rating switch
+		{			
+			Rating.Schlecht => FontAwesomeIcons.Angry,
+			Rating.Schwach => FontAwesomeIcons.SadCry,
+			Rating.Enttäuschend => FontAwesomeIcons.Frown,
+			Rating.Durchschnittlich => FontAwesomeIcons.Meh,
+			Rating.Gut => FontAwesomeIcons.SmileBeam,
+			Rating.Ausgezeichnet => FontAwesomeIcons.GrinStars
+		};
+}

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
+
+using Humanizer;
 
 using microcritic.Server.Models;
 
@@ -29,6 +29,7 @@ namespace microcritic.Server.Extensions
                 UserName = review.User.UserName,
                 Text = review.Text,
                 Date = review.Date,
+                DateString = review.Date.Humanize(culture: CultureInfo.GetCultureInfo("de-DE")),
             };
     }
 }

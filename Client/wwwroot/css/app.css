@@ -41,6 +41,10 @@ a, .btn-link {
     font-size: 60px;
 }
 
+.face-placeholder {
+    font-size: 25px;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

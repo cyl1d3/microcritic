@@ -24,5 +24,6 @@ namespace microcritic.Shared.ViewModels
         public string Text { get; set; }
 
         public DateTime Date { get; set; }
+        public string DateString { get; set; }
     }
 }
