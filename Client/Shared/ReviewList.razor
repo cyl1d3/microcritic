@@ -27,12 +27,12 @@
 			</div>
 		</div>
 	}
+	<div>
+	 
+	</div>
 </div>
 
 @code {	
-	[CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-
 	[Parameter]
 	public Game Game { get; set; }
 	
@@ -41,12 +41,10 @@
 
 	private Review[] _reviews;
 	private int _reviewPage;
-    private AuthenticationState _authState;
 
 	protected override async Task OnInitializedAsync()
 	{
 		base.OnInitialized();
-        _authState = await authenticationStateTask;
 		await Refresh();
 	}
 		
@@ -73,6 +71,7 @@
 			Rating.Enttäuschend => FontAwesomeIcons.Frown,
 			Rating.Durchschnittlich => FontAwesomeIcons.Meh,
 			Rating.Gut => FontAwesomeIcons.SmileBeam,
-			Rating.Ausgezeichnet => FontAwesomeIcons.GrinStars
+			Rating.Ausgezeichnet => FontAwesomeIcons.GrinStars,
+			_ => FontAwesomeIcons.MehBlank,
 		};
 }

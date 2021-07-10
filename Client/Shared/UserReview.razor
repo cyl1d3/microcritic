@@ -4,52 +4,52 @@
 @using microcritic.Shared.ViewModels
 
 <div class="flex-column w-100">
-    @if(_authState?.User?.Identity?.IsAuthenticated ?? false)
-    {
-        @if (_myReview is not null)
-        {
-            @if (_myReview.Id == Guid.Empty)
+    <AuthorizeView>
+        <Authorized>
+            @if (_myReview is not null)
             {
-                <h4>Lass ein Review da!</h4>
-                <div>
-                    <EditForm Model="@_myReview" OnValidSubmit="@SaveReview">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
+                @if (_myReview.Id == Guid.Empty)
+                {
+                    <h4>Lass ein Review da!</h4>
+                    <div>
+                        <EditForm Model="_myReview" OnValidSubmit="SaveReview" Context="formContext">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <ul class="list-group list-group-flush">					
+                                <li class="list-group-item">
+                                    <select class="form-select" @bind="_myReview.Rating">
+                                        @foreach(var rating in Enum.GetValues(typeof(Rating)).OfType<Rating>().Reverse())
+                                        {
+                                            <option value="@rating">@rating</option>
+                                        }
+                                    </select>
+                                </li>
+                                <li class="list-group-item">
+                                    <textarea placeholder="Teil uns deine Meinung mit!" class="form-control" rows="5" @bind="_myReview.Text" />
+                                </li>
+                                <li class="list-group-item">
+                                    <button class="btn btn-primary float-right" type="submit">Speichern</button>
+                                </li>
+                            </ul>
+                        </EditForm>
+                    </div>
+                }
+                else
+                {
+                    <h4>Dein Review</h4>
+                    <div>
                         <ul class="list-group list-group-flush">					
-                            <li class="list-group-item">
-                                <select class="form-select" @bind="_myReview.Rating">
-                                    @foreach(var rating in Enum.GetValues(typeof(Rating)).OfType<Rating>().Reverse())
-                                    {
-                                        <option value="@rating">@rating</option>
-                                    }
-                                </select>
-                            </li>
-                            <li class="list-group-item">
-                                <textarea class="form-control" rows="5" @bind="_myReview.Text" />
-                            </li>
-                            <li class="list-group-item">
-                                <button class="btn btn-primary float-right" type="submit">Speichern</button>
-                            </li>
+                            <li class="list-group-item"><ScoreDisplay Score="(decimal)_myReview.Rating" /></li>
+                            <li class="list-group-item">@_myReview.Text</li>
                         </ul>
-                    </EditForm>
-                </div>
+                    </div>
+                }
             }
-            else
-            {
-                <h4>Dein Review</h4>
-                <div>
-                    <ul class="list-group list-group-flush">					
-                        <li class="list-group-item"><ScoreDisplay Score="(decimal)_myReview.Rating" /></li>
-                        <li class="list-group-item">@_myReview.Text</li>
-                    </ul>
-                </div>
-            }
-        }
-    }
-    else
-    {
-        <p>Bitte einloggen, um ein Review zu hinterlassen.</p>
-    }
+        </Authorized>
+        <NotAuthorized>
+            <p>Bitte einloggen, um ein Review zu hinterlassen.</p>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @code {
@@ -74,24 +74,18 @@
 
     public async Task Refresh()
     {
-        if (_authState?.User?.Identity?.IsAuthenticated ?? false)
-        {
-		    var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
-            _myReview = await http.GetFromJsonAsync<Review>($"/api/Reviews/Game/{Game.Id}/User/{_authState.User.Identity.Name}");
+		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
+        _myReview = await http.GetFromJsonAsync<Review>($"/api/Reviews/Game/{Game.Id}/User/{_authState.User.Identity.Name}");
 
-            StateHasChanged();
-        }
+        StateHasChanged();
 	}
 
     private async Task SaveReview()
     {
-        if (_authState?.User?.Identity?.IsAuthenticated ?? false)
-        {
-            var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
-            await http.PostAsJsonAsync("/api/Reviews/Add", _myReview);
+        var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
+        await http.PostAsJsonAsync("/api/Reviews/Add", _myReview);
 
-            await OnReviewChanged.InvokeAsync();
-        }
+        await OnReviewChanged.InvokeAsync();
     }
 
 }

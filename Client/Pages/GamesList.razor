@@ -5,7 +5,7 @@
 
 <div class="w-100 h-100 d-flex justify-content-center mt-5">
 	<div class="flex-column w-75">		
-		<h3 class="pb-3">Games List</h3>
+		<h3 class="pb-3">Spiele</h3>
 		<table class="table table-hover">
 			<thead>
 			</thead>
@@ -14,17 +14,19 @@
 				{
 					<tr>
 						<td><a href="/gamedetails/@game.Id">@game.Name</a></td>
-						<td>@game.Developer</td>
+						<td>@game.Developer.Name</td>
 						<td><div class="float-right"><ScoreDisplay Score="game.Score" ReviewCount="game.ReviewCount" /></div></td>
 					</tr>
 				}
 			</tbody>
 		</table>
+		<GamesManagement @ref="_gamesManagement" OnGamesChanged="ReloadComponents" />
 	</div>
 </div>
 
 @code {
 
+	private GamesManagement _gamesManagement;
 	private Game[] _games;
 	private int _page = 0;
 
@@ -40,5 +42,9 @@
 		_games = await http.GetFromJsonAsync<Game[]>($"/api/Games/List/{_page}");
 		StateHasChanged();
 	}
-
+	
+	private async Task ReloadComponents()
+	{
+		await Refresh();
+	}
 }

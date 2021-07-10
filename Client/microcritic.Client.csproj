@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.Typeahead" Version="4.6.0" />
     <PackageReference Include="Blazorise" Version="0.9.3.10" />
     <PackageReference Include="Blazorise.Bootstrap" Version="0.9.3.10" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.10" />

@@ -15,7 +15,7 @@ namespace microcritic.Server.Extensions
                 Id = game.Id,
                 Name = game.Name,
                 Description = game.Description,
-                Developer = game.Developer.Name,
+                Developer = game.Developer.ToViewModel(),
                 Score = (decimal?)game.Reviews?.Average(r => r is null ? null : (byte)r.Rating),
                 ReviewCount = game.Reviews?.Count,
             };
@@ -30,6 +30,13 @@ namespace microcritic.Server.Extensions
                 Text = review.Text,
                 Date = review.Date,
                 DateString = review.Date.Humanize(utcDate:false, culture: CultureInfo.GetCultureInfo("de-DE")),
+            };
+
+        public static Shared.ViewModels.Developer ToViewModel(this Developer developer)
+            => new Shared.ViewModels.Developer
+            {
+                Id = developer.Id,
+                Name = developer.Name,
             };
     }
 }

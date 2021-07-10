@@ -42,6 +42,7 @@ namespace microcritic.Server.Controllers
                     .Include(r => r.User)
                     .Where(r => r.Game.Id == guid)
                     .Skip(PAGESIZE * page ?? 0).Take(PAGESIZE)
+                    .AsNoTracking()
                     .Select(r => r.ToViewModel())
                     .ToListAsync();
             }
@@ -62,6 +63,7 @@ namespace microcritic.Server.Controllers
                     .Include(r => r.User)
                     .Where(r => r.Game.Id == gameGuid)
                     .Where(r => r.User.UserName == username)
+                    .AsNoTracking()
                     .Select(r => r.ToViewModel())
                     .SingleOrDefaultAsync() 
                     ?? new Review 
@@ -105,7 +107,9 @@ namespace microcritic.Server.Controllers
         {
             if(Guid.TryParse(reviewId, out var reviewGuid))
             {
-                var review = await _context.Reviews.Where(r => r.Id == reviewGuid).SingleOrDefaultAsync();
+                var review = await _context.Reviews
+                    .Where(r => r.Id == reviewGuid)
+                    .SingleOrDefaultAsync();
 
                 _context.Reviews.Remove(review);
                 await _context.SaveChangesAsync();

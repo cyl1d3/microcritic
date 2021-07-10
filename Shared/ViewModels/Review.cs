@@ -17,10 +17,10 @@ namespace microcritic.Shared.ViewModels
 
         public string UserName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Bewertung wird benötigt")]
         public Rating Rating { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Text wird benötigt")]
         public string Text { get; set; }
 
         public DateTime Date { get; set; }
