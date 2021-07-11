@@ -1,10 +1,12 @@
-﻿@inject IHttpClientFactory HttpClientFactory
-@using Blazorise.Icons.FontAwesome
+﻿@using Blazorise.Icons.FontAwesome
 @using microcritic.Shared.Enums
 @using microcritic.Shared.ViewModels
+@using microcritic.Client.Logic
+
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="flex-column d-flex justify-content-center w-100">
-	@foreach(var review in _reviews ?? Array.Empty<Review>())
+	@foreach(var review in _reviews?.Take(_pagesize) ?? Array.Empty<Review>())
 	{
 		<div class="card border-secondary mb-3 w-75 align-self-center" >
 			<div class="card-header">
@@ -12,7 +14,7 @@
 					<div class="d-flex float-left align-items-center justify-content-center mr-2" style="border:1px solid black; border-radius:5px; min-width:40px; min-height:40px" >
 						<Icon Name="@GetFaceholder(review.Rating)" IconStyle="Blazorise.IconStyle.Regular" class="face-placeholder" />
 					</div>
-					<span>@review.UserName</span>
+					<span>@review.UserName.UnEmail()</span>
 					<span class="float-right"><small>@review.DateString</small></span>
 				</div>
 			</div>
@@ -27,20 +29,21 @@
 			</div>
 		</div>
 	}
-	<div>
-	 
+	<div class="mt-2">
+		<Paginator @ref="_paginator" Collection="_reviews" OnPageChange="Refresh" Pagesize="_pagesize" />
 	</div>
 </div>
 
-@code {	
+@code {
 	[Parameter]
 	public Game Game { get; set; }
 	
     [Parameter]
     public EventCallback OnReviewsChanged { get; set; }
 
+	private int _pagesize = 5;
+	private Paginator _paginator = new();
 	private Review[] _reviews;
-	private int _reviewPage;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -51,7 +54,7 @@
 	public async Task Refresh()
 	{
 		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
-		_reviews = await http.GetFromJsonAsync<Review[]>($"/api/Reviews/Game/{Game.Id}/{_reviewPage}");
+		_reviews = await http.GetFromJsonAsync<Review[]>($"/api/Reviews/Game/{Game.Id}/{_paginator.Page}");
 		StateHasChanged();
 	}
 
@@ -66,7 +69,6 @@
 	private string GetFaceholder(Rating rating)
 		=> rating switch
 		{			
-			Rating.Schlecht => FontAwesomeIcons.Angry,
 			Rating.Schwach => FontAwesomeIcons.SadCry,
 			Rating.Enttäuschend => FontAwesomeIcons.Frown,
 			Rating.Durchschnittlich => FontAwesomeIcons.Meh,

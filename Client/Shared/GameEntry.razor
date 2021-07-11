@@ -1,7 +1,8 @@
-﻿@inject IHttpClientFactory HttpClientFactory
-@using System.Net;
+﻿@using System.Net;
 @using Blazored.Typeahead;
 @using microcritic.Shared.ViewModels;
+
+@inject IHttpClientFactory HttpClientFactory
 
 <EditForm Model="_game" OnValidSubmit="SaveGame" Context="editContext">
 	<DataAnnotationsValidator />
@@ -57,6 +58,7 @@
 
     private async Task<Developer> AddDev(string searchText)
     {
+        //if text field is somehow empty, return null so we don't accidentally insert empty developer
         if (string.IsNullOrWhiteSpace(searchText))
         {
             return null;

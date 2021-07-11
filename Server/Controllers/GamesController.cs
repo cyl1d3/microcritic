@@ -53,7 +53,7 @@ namespace microcritic.Server.Controllers
             return await _context.Games.OrderBy(g => g.Name)
                 .Include(g => g.Developer)
                 .Include(g => g.Reviews)
-                .Skip(PAGESIZE * page ?? 0).Take(PAGESIZE)
+                .Skip(PAGESIZE * page ?? 0).Take(PAGESIZE + 1)
                 .AsNoTracking()
                 .Select(g => g.ToViewModel())
                 .ToListAsync();

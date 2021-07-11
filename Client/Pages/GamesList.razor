@@ -1,4 +1,5 @@
-﻿@page "/gameslist"
+﻿@page "/"
+@page "/gameslist"
 @inject IHttpClientFactory HttpClientFactory
 @using microcritic.Shared.ViewModels
 
@@ -6,11 +7,11 @@
 <div class="w-100 h-100 d-flex justify-content-center mt-5">
 	<div class="flex-column w-75">		
 		<h3 class="pb-3">Spiele</h3>
-		<table class="table table-hover h-50">
+		<table class="table table-hover">
 			<thead>
 			</thead>
 			<tbody>
-				@foreach (var game in _games ?? Array.Empty<Game>())
+				@foreach (var game in _games?.Take(_pagesize) ?? Array.Empty<Game>())
 				{
 					<tr>
 						<td><a href="/gamedetails/@game.Id">@game.Name</a></td>
@@ -26,7 +27,7 @@
 			</tbody>
 		</table>
 		<div class="mt-2">
-			<Paginator @ref="_paginator" Collection="_games" OnPageChange="Refresh" />
+			<Paginator @ref="_paginator" Collection="_games" OnPageChange="Refresh" Pagesize="_pagesize" />
 		</div>
 		<div class="mt-5">
 			<GamesManagement @ref="_gamesManagement" OnGamesChanged="ReloadComponents" />
@@ -35,9 +36,11 @@
 </div>
 
 @code {
-	private Paginator _paginator;
+	private Paginator _paginator = new();
 	private GamesManagement _gamesManagement;
 	private Game[] _games;
+
+	private int _pagesize = 5;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -48,7 +51,7 @@
 	private async Task Refresh()
 	{
 		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
-		_games = await http.GetFromJsonAsync<Game[]>($"/api/Games/List/{(_paginator?.Page ?? 0)}");
+		_games = await http.GetFromJsonAsync<Game[]>($"/api/Games/List/{_paginator.Page}");
 		StateHasChanged();
 	}
 	

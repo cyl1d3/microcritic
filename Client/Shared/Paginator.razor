@@ -1,9 +1,9 @@
 ﻿<div class="d-flex justify-content-center">
-	<ul class="pagination">
+	<ul class="pagination @(_page == 0 && isLastPage ? "collapse" : "")">
 		<li class="page-item @(_page == 0 ? "disabled" : "")">
 			<a class="page-link" @onclick="() => PrevPage()" >&laquo;</a>
 		</li>  
-		<li class="page-item @((Collection?.Length ?? 0) < PAGESIZE ? "disabled" : "")">
+		<li class="page-item @(isLastPage ? "disabled" : "")">
 			<a class="page-link" @onclick="() => NextPage()" >&raquo;</a>
 		</li>
 	</ul>
@@ -11,25 +11,29 @@
 
 @code {
 	[Parameter]
-	public object[] Collection { get; set; }
+	public object[] Collection { get; set; } //the collection of records to page for
+
+	[Parameter]
+	public int Pagesize { get; set; } //the collection of records to page for
 		
     [Parameter]
     public EventCallback OnPageChange { get; set; }
 
 	public int Page => _page;
 
-	private const int PAGESIZE = 5;
 	private int _page = 0;
+
+	private bool isLastPage => (Collection?.Length ?? 0) <= Pagesize;
 	
-	private async Task PrevPage()
+	public async Task PrevPage()
 	{
 		_page = _page == 0 ? _page : _page - 1;
 		await OnPageChange.InvokeAsync();
 	}	
 	
-	private async Task NextPage()
+	public async Task NextPage()
 	{
-		_page = (Collection?.Length ?? 0) < PAGESIZE ? _page : _page + 1;
+		_page = isLastPage ? _page : _page + 1;
 		await OnPageChange.InvokeAsync();
 	}
 

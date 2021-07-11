@@ -1,17 +1,18 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using microcritic.Client.Logic;
 
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, @context.User.Identity.Name!</a>
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+        <a href="authentication/profile">Willkommen, @context.User.Identity.Name.UnEmail()!</a>
+        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Logout</button>
     </Authorized>
     <NotAuthorized>
-        <a href="authentication/register">Register</a>
-        <a href="authentication/login">Log in</a>
+        <a href="authentication/register">Registrieren</a>
+        <a href="authentication/login">Login</a>
     </NotAuthorized>
 </AuthorizeView>
 

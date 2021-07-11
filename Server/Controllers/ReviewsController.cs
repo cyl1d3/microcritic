@@ -41,7 +41,7 @@ namespace microcritic.Server.Controllers
                     .Include(r => r.Game)
                     .Include(r => r.User)
                     .Where(r => r.Game.Id == guid)
-                    .Skip(PAGESIZE * page ?? 0).Take(PAGESIZE)
+                    .Skip(PAGESIZE * page ?? 0).Take(PAGESIZE + 1)
                     .AsNoTracking()
                     .Select(r => r.ToViewModel())
                     .ToListAsync();

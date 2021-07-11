@@ -1,10 +1,8 @@
 ﻿@inject IHttpClientFactory HttpClientFactory
 @using System.Globalization;
 @using System.IO
-
 @using Blazorise.Icons.FontAwesome
 @using CsvHelper
-
 @using microcritic.Shared.ViewModels
 
 
@@ -23,7 +21,7 @@
             </div>
             <div style="min-height: 40px;">
                 <span class="text-danger float-left @(_error ? "" : "collapse")">Fehler beim Einlesen des CSV!</span>  
-                <span class="text-success float-left @(_success ? "" : "collapse")">@_inserts Spiele neu angelegt.</span>  
+                <span class="text-success float-left @(_success ? "" : "collapse")">@_inserts Spiel(e) neu angelegt.</span>  
             </div>
         </div>
         <div class="">
@@ -46,10 +44,10 @@
     public bool HasRecords => (_games?.Count() ?? 0) > 0;
 
     private IEnumerable<CsvGame> _games;
-    private bool _processing;
-    private bool _success;
-    private int _inserts;
-    private bool _error;
+    private bool _processing;   //application is doing something, show spinner on button
+    private bool _success;      //import successful, show message
+    private int _inserts;       //number of games inserted
+    private bool _error;        //error processing csv
 
     private async Task LoadFile(Blazorise.FileChangedEventArgs args)
     {
@@ -62,6 +60,7 @@
 
         try
         {
+            //read file content into string, feed string into csv processor
             var file = args.Files.FirstOrDefault();
             var content = await new StreamReader(file.OpenReadStream()).ReadToEndAsync();
             using var csv = new CsvReader(new StringReader(content), CultureInfo.InvariantCulture);
@@ -80,9 +79,9 @@
         }
     }
 
-
     private async Task SaveGames()
     {
+        //send csv records to backend for saving
         _processing = true;
         var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
         var result = await http.PostAsJsonAsync("/api/Games/AddCsv", _games);
@@ -90,6 +89,7 @@
         if(result.IsSuccessStatusCode)
         {
             _success = true;
+            //server returns inserted records, display number in success message
             _inserts = (await result.Content.ReadFromJsonAsync<IEnumerable<Game>>()).Count();
         }
 

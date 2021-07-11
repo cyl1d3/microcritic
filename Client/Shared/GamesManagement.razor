@@ -1,8 +1,9 @@
-﻿@inject IHttpClientFactory HttpClientFactory
-@using System.Net;
+﻿@using System.Net;
 @using Blazorise.Icons.FontAwesome;
 @using TailBlazor.Tabs;
 @using microcritic.Shared.ViewModels;
+
+@inject IHttpClientFactory HttpClientFactory
 
 <AuthorizeView Roles="Admin">
 	<Authorized>
