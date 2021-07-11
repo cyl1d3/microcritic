@@ -105,15 +105,20 @@ namespace microcritic.Server.Controllers
         [HttpDelete("{reviewid}")]
         public async Task<IActionResult> Delete(string reviewId)
         {
-            if(Guid.TryParse(reviewId, out var reviewGuid))
+            if (Guid.TryParse(reviewId, out var reviewGuid))
             {
-                var review = await _context.Reviews
-                    .Where(r => r.Id == reviewGuid)
-                    .SingleOrDefaultAsync();
+                var review = await _context.Reviews.FindAsync(reviewGuid);
 
-                _context.Reviews.Remove(review);
-                await _context.SaveChangesAsync();
-                return Ok();
+                if (review is not null)
+                {
+                    _context.Reviews.Remove(review);
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             else
             {

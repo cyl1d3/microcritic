@@ -68,12 +68,7 @@ namespace microcritic.Server.Controllers
                 Models.Developer developer;
                 if (game.Developer.Id == Guid.Empty)
                 {
-                    developer = new Models.Developer
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = game.Developer.Name,
-                    };
-                    _context.Developers.Add(developer);
+                    developer = NewDeveloper(game.Developer.Name);
                 }
                 else
                 {
@@ -106,11 +101,95 @@ namespace microcritic.Server.Controllers
         {
             if (ModelState.IsValid)
             {
+                var gamesInFile = games.GroupBy(g => g.Name)
+                    .ToDictionary(group => group.Key, group => group.First());
 
+                //get games with names equal to name in file from db
+                //assumes games are unique by name
+                var existingGames = await _context.Games
+                    .Where(g => gamesInFile.Keys.Contains(g.Name))
+                    .AsNoTracking()
+                    .Select(g => g.Name)
+                    .ToListAsync();
 
-                return new OkObjectResult(4);
+                if(existingGames.Count() == gamesInFile.Count())
+                {
+                    //all games exist, return empty
+                    return new JsonResult(new object[] { });
+                }
+
+                //get developers in file from db
+                //assumes devs are unique by name
+                var allDevs = games.Select(g => g.Developer).Distinct();
+                var knownDevs = await _context.Developers
+                    .Where(d => allDevs.Contains(d.Name))
+                    .ToDictionaryAsync(d => d.Name, d => d);
+
+                foreach(var dev in allDevs.Except(knownDevs.Keys))
+                {
+                    //create unknown devs
+                    var newDev = NewDeveloper(dev);
+                    knownDevs[dev] = newDev;
+                }
+
+                var resultset = new List<Models.Game>();
+                foreach(var game in gamesInFile.Keys.Except(existingGames))
+                {
+                    //create games that don't exist
+                    var newGame = new Models.Game
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = game,
+                        Description = gamesInFile[game].Description,
+                        Developer = knownDevs[gamesInFile[game].Developer],
+                    };
+
+                    await _context.Games.AddAsync(newGame);
+                    resultset.Add(newGame);
+                }
+
+                await _context.SaveChangesAsync();
+
+                //Return newly added objects
+                return new OkObjectResult(resultset.Select(g => g.ToViewModel()));
             }
             return BadRequest();
+        }
+
+        [HttpDelete("{gameid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(string gameid)
+        {
+            if(Guid.TryParse(gameid, out var gameGuid))
+            {
+                var game = await _context.Games.FindAsync(gameGuid);
+
+                if (game is not null)
+                {
+                    _context.Games.Remove(game);
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        private Models.Developer NewDeveloper(string name)
+        {
+            Models.Developer developer = new Models.Developer
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+            };
+            _context.Developers.Add(developer);
+            return developer;
         }
     }
 }

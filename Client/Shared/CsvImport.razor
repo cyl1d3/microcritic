@@ -9,20 +9,34 @@
 
 
 <div class="m-4">
-    <div class="form-group">
-        <Blazorise.Bootstrap.FileEdit class="@(_error ? "is-invalid" : "")" Changed="@LoadFile" />
-        <span class="text-danger float-left @(_error ? "" : "collapse")">Fehler beim Einlesen des CSV!</span>  
-        <span class="text-danger float-left @(_error ? "" : "collapse")">Fehler beim Einlesen des CSV!</span>  
+    <div class="flex-column">
+        <div class="form-group">
+            <div class="w-100 row">
+                <div class="w-75 pl-2">
+                    <Blazorise.Bootstrap.FileEdit class="@($"{(_error ? "is-invalid" : "")} pl-5")" Changed="@LoadFile" />                
+                </div>
+                <div class="w-25 p-2">
+                    <Icon Name="@(_error ? FontAwesomeIcons.TimesCircle : FontAwesomeIcons.CheckCircle)" 
+                        IconStyle="Blazorise.IconStyle.Regular"
+                        Class="@($"{(_error ? "text-danger" : "text-success")} {(HasRecords || _error ? "" : "collapse")} erroricon")" />                
+                </div>
+            </div>
+            <div style="min-height: 40px;">
+                <span class="text-danger float-left @(_error ? "" : "collapse")">Fehler beim Einlesen des CSV!</span>  
+                <span class="text-success float-left @(_success ? "" : "collapse")">@_inserts Spiele neu angelegt.</span>  
+            </div>
+        </div>
+        <div class="">
+            <Blazorise.Bootstrap.Button
+                Class=""
+                Color="Blazorise.Color.Primary"
+                Loading="_processing" 
+                Disabled="!HasRecords"
+                @onclick="SaveGames">
+                Upload
+            </Blazorise.Bootstrap.Button>
+        </div>
     </div>
-    <Blazorise.Bootstrap.Button
-        Class="mt-2 float-right"
-        Color="Blazorise.Color.Primary"
-        Loading="_processing" 
-        Disabled="!HasRecords"
-        @onclick="SaveGames">
-        Upload
-    </Blazorise.Bootstrap.Button>
-    
 </div>
 
 @code {
@@ -36,8 +50,6 @@
     private bool _success;
     private int _inserts;
     private bool _error;
-
-    private bool _test;
 
     private async Task LoadFile(Blazorise.FileChangedEventArgs args)
     {

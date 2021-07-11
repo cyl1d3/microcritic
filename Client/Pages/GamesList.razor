@@ -6,7 +6,7 @@
 <div class="w-100 h-100 d-flex justify-content-center mt-5">
 	<div class="flex-column w-75">		
 		<h3 class="pb-3">Spiele</h3>
-		<table class="table table-hover">
+		<table class="table table-hover h-50">
 			<thead>
 			</thead>
 			<tbody>
@@ -16,19 +16,28 @@
 						<td><a href="/gamedetails/@game.Id">@game.Name</a></td>
 						<td>@game.Developer.Name</td>
 						<td><div class="float-right"><ScoreDisplay Score="game.Score" ReviewCount="game.ReviewCount" /></div></td>
+						<AuthorizeView Roles="Admin">
+							<Authorized>
+								<button type="button" class="btn btn-outline-danger float-right" @onclick="() => Delete(game)">Löschen</button>
+							</Authorized>
+						</AuthorizeView>
 					</tr>
 				}
 			</tbody>
 		</table>
-		<GamesManagement @ref="_gamesManagement" OnGamesChanged="ReloadComponents" />
+		<div class="mt-2">
+			<Paginator @ref="_paginator" Collection="_games" OnPageChange="Refresh" />
+		</div>
+		<div class="mt-5">
+			<GamesManagement @ref="_gamesManagement" OnGamesChanged="ReloadComponents" />
+		</div>
 	</div>
 </div>
 
 @code {
-
+	private Paginator _paginator;
 	private GamesManagement _gamesManagement;
 	private Game[] _games;
-	private int _page = 0;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -39,12 +48,19 @@
 	private async Task Refresh()
 	{
 		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI.public");
-		_games = await http.GetFromJsonAsync<Game[]>($"/api/Games/List/{_page}");
+		_games = await http.GetFromJsonAsync<Game[]>($"/api/Games/List/{(_paginator?.Page ?? 0)}");
 		StateHasChanged();
 	}
 	
 	private async Task ReloadComponents()
 	{
+		await Refresh();
+	}
+
+	private async Task Delete(Game game)
+	{
+		var http = HttpClientFactory.CreateClient("microcritic.ServerAPI");
+		await http.DeleteAsync($"/api/Games/Delete/{game.Id}");
 		await Refresh();
 	}
 }

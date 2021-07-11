@@ -45,6 +45,10 @@ a, .btn-link {
     font-size: 25px;
 }
 
+.erroricon {
+    font-size: 25px;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
