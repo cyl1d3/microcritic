@@ -7,6 +7,9 @@ using microcritic.Server.Models;
 
 namespace microcritic.Server.Extensions
 {
+    /// <summary>
+    /// Provides convenience functions to convert models to viewmodels
+    /// </summary>
     public static class ModelExtensions
     {
         public static Shared.ViewModels.Game ToViewModel(this Game game)

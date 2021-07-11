@@ -30,6 +30,7 @@ namespace microcritic.Server.Models
         [Required]
         public DateTime Date { get; set; }
 
+        [Required]
         public string Text { get; set; }
 
     }

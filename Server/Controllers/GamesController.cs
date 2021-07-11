@@ -43,6 +43,7 @@ namespace microcritic.Server.Controllers
             }
             else
             {
+                _logger.LogInformation($"Game with id {id} does not exist");
                 return null;
             }
         }
@@ -65,6 +66,7 @@ namespace microcritic.Server.Controllers
         {
             if (ModelState.IsValid)
             {
+                //get the developer associated or create a new one
                 Models.Developer developer;
                 if (game.Developer.Id == Guid.Empty)
                 {
@@ -75,6 +77,7 @@ namespace microcritic.Server.Controllers
                     developer = await _context.Developers.Where(d => d.Id == game.Developer.Id).SingleOrDefaultAsync();
                 }
 
+                //check if the game exists: same name and same developer
                 bool gameExists = await _context.Games.AnyAsync(g => g.Name == game.Name && game.Developer.Id == developer.Id);
                 if (gameExists)
                 {
@@ -150,7 +153,7 @@ namespace microcritic.Server.Controllers
 
                 await _context.SaveChangesAsync();
 
-                //Return newly added objects
+                //return newly added objects
                 return new OkObjectResult(resultset.Select(g => g.ToViewModel()));
             }
             return BadRequest();

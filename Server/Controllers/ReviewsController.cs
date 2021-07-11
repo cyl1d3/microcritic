@@ -48,7 +48,8 @@ namespace microcritic.Server.Controllers
             }
             else
             {
-                return null;
+                _logger.LogInformation($"Game with id {id} does not exist");
+                return new Review[] { };
             }
         }
 
@@ -58,6 +59,7 @@ namespace microcritic.Server.Controllers
         {
             if (Guid.TryParse(gameid, out var gameGuid))
             {
+                //get the users review ..
                 return await _context.Reviews
                     .Include(r => r.Game)
                     .Include(r => r.User)
@@ -66,6 +68,7 @@ namespace microcritic.Server.Controllers
                     .AsNoTracking()
                     .Select(r => r.ToViewModel())
                     .SingleOrDefaultAsync() 
+                    // .. or create a blank one, if there is none
                     ?? new Review 
                     {
                         Game = gameGuid,
@@ -75,6 +78,7 @@ namespace microcritic.Server.Controllers
             }
             else
             {
+                _logger.LogInformation($"Game with id {gameid} does not exist");
                 return null;
             }
         }

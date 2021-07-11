@@ -30,6 +30,7 @@ namespace microcritic.Server.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{namesearch?}")]
+        //for consumption by typeahead control
         public async Task<IEnumerable<Developer>> List(string nameSearch)
         {
             nameSearch ??= "";
