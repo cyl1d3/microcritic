@@ -31,7 +31,10 @@ namespace microcritic.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLettuceEncrypt();
+            if (Configuration.GetValue<bool>("UseLetsEncrypt"))
+            {
+                services.AddLettuceEncrypt();
+            }
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -62,11 +65,6 @@ namespace microcritic.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
-
-            if (Configuration.GetValue<bool>("UseLetsEncrypt"))
-            {
-                services.AddLettuceEncrypt();
-            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
