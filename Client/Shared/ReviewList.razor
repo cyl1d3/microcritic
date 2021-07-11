@@ -5,13 +5,13 @@
 
 @inject IHttpClientFactory HttpClientFactory
 
-<div class="flex-column d-flex justify-content-center w-100">
-	@foreach(var review in _reviews?.Take(_pagesize) ?? Array.Empty<Review>())
+<div id="reviews" class="flex-column d-flex justify-content-center w-100">
+	@foreach(var review in _reviews?.Take(_pagesize) ?? Array.Empty<Review>()) @*can have one more record due to lookahead*@
 	{
 		<div class="card border-secondary mb-3 w-75 align-self-center" >
 			<div class="card-header">
 				<div class="flex-row">
-					<div class="d-flex float-left align-items-center justify-content-center mr-2" style="border:1px solid black; border-radius:5px; min-width:40px; min-height:40px" >
+					<div class="d-flex float-left align-items-center justify-content-center mr-3" style="border:1px solid black; border-radius:5px; min-width:40px; min-height:40px" >
 						<Icon Name="@GetFaceholder(review.Rating)" IconStyle="Blazorise.IconStyle.Regular" class="face-placeholder" />
 					</div>
 					<span>@review.UserName.UnEmail()</span>

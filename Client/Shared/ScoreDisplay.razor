@@ -8,7 +8,16 @@
 		}
 		@if (ReviewCount.HasValue)
 		{
-			<small class="ml-2">(@ReviewCount)</small>
+			<small class="ml-2">
+				@if (string.IsNullOrWhiteSpace(ReviewLink)) 
+				{
+					<span>(@ReviewCount)</span>
+				}
+				else
+				{
+					<a href="@ReviewLink">(@ReviewCount)</a>
+				}
+			</small>
 		}
 	}
 </div>
@@ -19,6 +28,9 @@
 
 	[Parameter]
 	public int? ReviewCount { get; set; }
+
+	[Parameter]
+	public string ReviewLink { get; set; }
 
 	public decimal RoundedScore => Math.Round((Score ?? 0) * 2, MidpointRounding.AwayFromZero) / 2;
 

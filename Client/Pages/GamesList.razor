@@ -1,7 +1,8 @@
 ﻿@page "/"
 @page "/gameslist"
-@inject IHttpClientFactory HttpClientFactory
 @using microcritic.Shared.ViewModels
+
+@inject IHttpClientFactory HttpClientFactory
 
 
 <div class="w-100 h-100 d-flex justify-content-center mt-5">
@@ -11,12 +12,12 @@
 			<thead>
 			</thead>
 			<tbody>
-				@foreach (var game in _games?.Take(_pagesize) ?? Array.Empty<Game>())
+				@foreach (var game in _games?.Take(_pagesize) ?? Array.Empty<Game>()) @*can have one more record due to lookahead*@
 				{
 					<tr>
 						<td><a href="/gamedetails/@game.Id">@game.Name</a></td>
 						<td>@game.Developer.Name</td>
-						<td><div class="float-right"><ScoreDisplay Score="game.Score" ReviewCount="game.ReviewCount" /></div></td>
+						<td><div class="float-right"><ScoreDisplay Score="game.Score" ReviewCount="game.ReviewCount" ReviewLink="@($"/gamedetails/{game.Id}#reviews")" /></div></td>
 						<AuthorizeView Roles="Admin">
 							<Authorized>
 								<button type="button" class="btn btn-outline-danger float-right" @onclick="() => Delete(game)">Löschen</button>

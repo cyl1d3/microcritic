@@ -63,8 +63,10 @@ namespace microcritic.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddLettuceEncrypt();
-
+            if (Configuration.GetValue<bool>("UseLetsEncrypt"))
+            {
+                services.AddLettuceEncrypt();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

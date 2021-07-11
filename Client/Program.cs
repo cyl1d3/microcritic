@@ -25,10 +25,12 @@ namespace microcritic.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
 
+            //register client for public calls that do not need to be authorized
             builder.Services.AddHttpClient("microcritic.ServerAPI.public", client => {
                 client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
             });
 
+            //register client for calls with authorization
             builder.Services.AddHttpClient("microcritic.ServerAPI", client => {
                 client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
             }).AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();

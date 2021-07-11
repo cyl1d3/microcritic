@@ -1,7 +1,8 @@
-﻿@inject IHttpClientFactory HttpClientFactory
-@using System.Linq
+﻿@using System.Linq
 @using microcritic.Shared.Enums
 @using microcritic.Shared.ViewModels
+
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="flex-column w-100">
     <AuthorizeView>
@@ -47,14 +48,14 @@
             }
         </Authorized>
         <NotAuthorized>
-            <p>Bitte einloggen, um ein Review zu hinterlassen.</p>
+            <p>Bitte <a href="/authentication/login">einloggen</a>, um ein Review zu hinterlassen.</p>
         </NotAuthorized>
     </AuthorizeView>
 </div>
 
 @code {
-    
-	[CascadingParameter]
+
+    [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     [Parameter]
@@ -69,7 +70,10 @@
 	protected async override Task OnInitializedAsync()
     {
         _authState = await authenticationStateTask;
-        await Refresh();
+        if (_authState.User.Identity.IsAuthenticated)
+        {
+            await Refresh();
+        }
     }
 
     public async Task Refresh()

@@ -1,6 +1,9 @@
 ﻿@page "/gamedetails/{id}"
-@inject IHttpClientFactory HttpClientFactory
+@using Microsoft.AspNetCore.Components;
 @using microcritic.Shared.ViewModels
+
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager navigationManager
 
 @if (_game is null)
 {
